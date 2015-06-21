@@ -138,6 +138,21 @@
       .addon-primary:active {
         opacity: 0.90;
       }
+
+      .select {
+        display: inline-block;
+        margin: 0 auto;
+      }
+
+      video,
+      canvas,
+      .screenshot {
+        display: block;
+      }
+
+      .screenshot {
+        display: none;
+      }
     </style>
   </head>
 
@@ -152,26 +167,43 @@
         <div class="col-md-1"></div>
         <div class="col-md-10">
           <div class="panel panel-default">
-            <div class="panel-heading">
+            <!-- <div class="panel-heading">
               <h3 class="panel-title">Widget</h3>
-            </div>
+            </div> -->
 
             <div class="panel-body">
               <div class="container-fluid">
                 <center>
                   <div class="row">
-                    <span class="inside-title">askldjalksjdlkajsdl</span>
+                    <span class="inside-title">Take A Selfie!</span>
+                  </div>
+
+                  <div class="row">
+                    <video height="240" width="320" muted autoplay></video>
                   </div>
 
                   <div class="row">
                     <div class="select">
-                      <label for="audioSource">Audio source: </label><select id="audioSource"></select>
+                      <label for="audioSource"><span class="glyphicon glyphicon-headphones"></span>&nbsp;Audio Source:&nbsp;</label><select id="audioSource"></select>
                     </div>
-
+                    <br>
                     <div class="select">
-                      <label for="videoSource">Video source: </label><select id="videoSource"></select>
+                      <label for="videoSource"><span class="glyphicon glyphicon-facetime-video"></span>&nbsp;Video Source:&nbsp;</label><select id="videoSource"></select>
                     </div>
-                    <video muted autoplay></video>
+                  </div>
+
+                  <div class="row">
+                    <button type="button" class="btn btn-primary"  onclick="snapshot()"><span class="glyphicon glyphicon-record"></span></button>
+                    <button type="button" class="btn btn-primary"><span class="glyphicon glyphicon-stop"></span></button>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-3"></div>
+                    <div class="col-md-6">
+                      <img class="screenshot" src="" height="100%" width="100%"/>
+                      <canvas style="display:none;" height="480" width="640"></canvas>
+                    </div>
+                    <div class="col-md-3"></div>
                   </div>
                 </center>
               </div>
@@ -191,21 +223,45 @@
       var videoElement = document.querySelector('video');
       var audioSelect = document.querySelector('select#audioSource');
       var videoSelect = document.querySelector('select#videoSource');
+      var canvas = document.querySelector('canvas');
+      var ctx = canvas.getContext('2d');
+      var localMediaStream = null;
 
       navigator.getUserMedia = navigator.getUserMedia ||
       navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
+      /* Snapshot */
+      function snapshot() {
+        if (localMediaStream) {
+          ctx.drawImage(videoElement, 0, 0);
+          // "image/webp" works in Chrome.
+          // Other browsers will fall back to image/png.
+          $('.screenshot').show();
+          document.querySelector('img').src = canvas.toDataURL('image/webp');
+        }
+      }
+
+      videoElement.addEventListener('click', snapshot, false);
+
+      // Not showing vendor prefixes or code that works cross-browser.
+      navigator.getUserMedia({video: true}, function(stream) {
+        videoElement.src = window.URL.createObjectURL(stream);
+        localMediaStream = stream;
+      }, errorCallback);
+
+
+      /* Source */
       function gotSources(sourceInfos) {
       for (var i = 0; i !== sourceInfos.length; ++i) {
         var sourceInfo = sourceInfos[i];
         var option = document.createElement('option');
         option.value = sourceInfo.id;
         if (sourceInfo.kind === 'audio') {
-          option.text = sourceInfo.label || 'microphone ' +
+          option.text = sourceInfo.label || 'Microphone ' +
             (audioSelect.length + 1);
           audioSelect.appendChild(option);
         } else if (sourceInfo.kind === 'video') {
-          option.text = sourceInfo.label || 'camera ' + (videoSelect.length + 1);
+          option.text = sourceInfo.label || 'Camera ' + (videoSelect.length + 1);
           videoSelect.appendChild(option);
         } else {
           console.log('Some other kind of source: ', sourceInfo);
