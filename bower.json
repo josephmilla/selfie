@@ -1,0 +1,25 @@
+{
+  "name": "selfie",
+  "version": "0.0.0",
+  "homepage": "https://github.com/josephmilla/selfie",
+  "authors": [
+    "Joseph Milla <jjtmilla@gmail.com>"
+  ],
+  "description": "Entry for the Challengepost Reinvent The Selfie (Powered by Twilio) Competition",
+  "main": "index.html",
+  "keywords": [
+    "challengepost",
+    "selfie"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.5"
+  }
+}
