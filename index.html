@@ -138,6 +138,12 @@
       .addon-primary:active {
         opacity: 0.90;
       }
+
+      .select {
+        display: inline-block;
+        margin: 0 auto;
+      }
+
     </style>
   </head>
 
@@ -164,14 +170,18 @@
                   </div>
 
                   <div class="row">
-                    <div class="select">
-                      <label for="audioSource">Audio source: </label><select id="audioSource"></select>
-                    </div>
-
-                    <div class="select">
-                      <label for="videoSource">Video source: </label><select id="videoSource"></select>
-                    </div>
                     <video muted autoplay></video>
+                    <br><br>
+                    Settings:
+                    <br>
+                    <div class="select">
+                      <label for="audioSource"><span class="glyphicon glyphicon-headphones"></span>&nbsp;Audio Source:&nbsp;</label><select id="audioSource"></select>
+                    </div>
+                    <br>
+                    <div class="select">
+                      <label for="videoSource"><span class="glyphicon glyphicon-facetime-video"></span>&nbsp;Video Source:&nbsp;</label><select id="videoSource"></select>
+                    </div>
+                    <br>
                   </div>
                 </center>
               </div>
@@ -201,11 +211,11 @@
         var option = document.createElement('option');
         option.value = sourceInfo.id;
         if (sourceInfo.kind === 'audio') {
-          option.text = sourceInfo.label || 'microphone ' +
+          option.text = sourceInfo.label || 'Microphone ' +
             (audioSelect.length + 1);
           audioSelect.appendChild(option);
         } else if (sourceInfo.kind === 'video') {
-          option.text = sourceInfo.label || 'camera ' + (videoSelect.length + 1);
+          option.text = sourceInfo.label || 'Camera ' + (videoSelect.length + 1);
           videoSelect.appendChild(option);
         } else {
           console.log('Some other kind of source: ', sourceInfo);
