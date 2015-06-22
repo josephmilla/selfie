@@ -280,7 +280,7 @@
               xhr.send();
 
               $('#gif-container').append('<img src="' + blobURL + '"/>');
-              $('#gif-container').append('<div class="row"><div class="col-md-3"></div><div class="col-md-6"><span class="inside-title">Share Your Selfie</span><br><a class="btn btn-social-icon btn-facebook" onclick=share("facebook")><i class="fa fa-facebook"></i></a>&nbsp;<a class="btn btn-social-icon btn-twitter" onclick=share("twitter")><i class="fa fa-twitter"></i></a>&nbsp;<a class="btn btn-social-icon btn-pinterest" onclick=textMessage()><i class="glyphicon glyphicon-phone"></i></a><br><br></div><div class="col-md-3"></div></div>');
+              $('#gif-container').append('<div class="row"><div class="col-md-3"></div><div class="col-md-6"><span class="inside-title">Share Your Selfie</span><br><a class="btn btn-social-icon btn-facebook" onclick=share("facebook")><i class="fa fa-facebook"></i></a>&nbsp;<a class="btn btn-social-icon btn-twitter" onclick=share("twitter")><i class="fa fa-twitter"></i></a>&nbsp;<a class="btn btn-social-icon btn-pinterest" onclick=textMessage()><i class="glyphicon glyphicon-phone"></i></a>&nbsp;<a id="download" class="btn btn-social-icon btn-default" onclick=share("download")><i class="glyphicon glyphicon-download-alt"></i></a><br><br></div><div class="col-md-3"></div></div>');
           };
       }
 
@@ -302,7 +302,7 @@
           if(site == 'facebook') {
             window.open('https://www.facebook.com/sharer/sharer.php?t=Selfie&u=' + imgurURL);
           } else if(site == 'twitter') {
-            window.open('https://twitter.com/intent/tweet?text=Selfie&url='+ imgurURL +'&via=josephmilla');
+            window.open('https://twitter.com/intent/tweet?text=Selfie&url='+ imgurURL +'&via=josephmilla&hashtags=SorryNotSorry,ChallengePost,SummerJam');
           } else if(site == 'twilio') {
             $.ajax({
               url: 'http://45.55.134.228:8081/twilio',
@@ -315,6 +315,11 @@
                 console.log("Message was sent!");
               }
             });
+          } else {
+            var a = $("#download")
+            .attr("href", imgurURL)
+            .attr("download", "selfie.gif")
+            a[0].click();
           }
         } else {
           $.ajax({
@@ -349,6 +354,11 @@
                     console.log("Message was sent!");
                   }
                 });
+              } else {
+                var a = $("#download")
+                .attr("href", imgurURL)
+                .attr("download", "selfie.gif")
+                a[0].click();
               }
             }
           });
