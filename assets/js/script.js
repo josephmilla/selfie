@@ -124,6 +124,19 @@ function share(site) {
         var id = result.data.id;
         // window.location = 'https://imgur.com/gallery/' + id;
         imgurURL = 'http://i.imgur.com/'+ id + '.gif';
+
+        $.ajax({
+          url: 'https://api.imgur.com/3/album/K8QkR/add',
+          type: 'PUT',
+          headers: {
+            Authorization: 'Bearer 0fedd98fe56898c9c871dd1b25676628efebc98f',
+            Accept: 'application/json'
+          },
+          data: {
+            ids: [id]
+          }
+        });
+
         if(site == 'facebook') {
           // window.open('https://www.facebook.com/sharer/sharer.php?t=Selfie&u=' + imgurURL);
           window.open('https://www.facebook.com/dialog/share?app_id=145634995501895&display=popup&href=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2F&redirect_uri=https%3A%2F%2Fdevelopers.facebook.com%2Ftools%2Fexplorer')
