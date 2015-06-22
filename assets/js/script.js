@@ -129,7 +129,7 @@ function share(site) {
           url: 'https://api.imgur.com/3/album/K8QkR/add',
           type: 'PUT',
           headers: {
-            Authorization: 'Bearer 0fedd98fe56898c9c871dd1b25676628efebc98f',
+            Authorization: 'Bearer 0a10676df9afdc839ae53ce952e5db850c6b3463',
             Accept: 'application/json'
           },
           data: {
