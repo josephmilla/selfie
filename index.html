@@ -41,6 +41,7 @@
     <!-- CSS -->
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="bower_components/bootstrap-social/bootstrap-social.css">
     <link rel="stylesheet" type="text/css" href="assets/css/style.css">
 
     <style>
@@ -83,6 +84,10 @@
         font-weight: 900;
         color: #2c3e50;
         display: block;
+      }
+
+      .hashtag {
+        font-weight: 300;
       }
 
       p {
@@ -176,34 +181,19 @@
                 <center>
                   <div class="row">
                     <span class="inside-title">Take A Selfie!</span>
+                    <span class="hashtag">#SorryNotSorry</span>
                   </div>
 
                   <div class="row">
-                    <video height="240" width="320" muted autoplay></video>
+                    <div id="videos-container"></div>
                   </div>
 
                   <div class="row">
-                    <div class="select">
-                      <label for="audioSource"><span class="glyphicon glyphicon-headphones"></span>&nbsp;Audio Source:&nbsp;</label><select id="audioSource"></select>
-                    </div>
-                    <br>
-                    <div class="select">
-                      <label for="videoSource"><span class="glyphicon glyphicon-facetime-video"></span>&nbsp;Video Source:&nbsp;</label><select id="videoSource"></select>
-                    </div>
+                    <button id="start" type="button" class="btn btn-primary"  onclick="snapshot()"><span class="glyphicon glyphicon-record"></span></button>
+                    <button id="stop" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-stop"></span></button>
                   </div>
 
-                  <div class="row">
-                    <button type="button" class="btn btn-primary"  onclick="snapshot()"><span class="glyphicon glyphicon-record"></span></button>
-                    <button type="button" class="btn btn-primary"><span class="glyphicon glyphicon-stop"></span></button>
-                  </div>
-
-                  <div class="row">
-                    <div class="col-md-3"></div>
-                    <div class="col-md-6">
-                      <img class="screenshot" src="" height="100%" width="100%"/>
-                      <canvas style="display:none;" height="480" width="640"></canvas>
-                    </div>
-                    <div class="col-md-3"></div>
+                  <div id="gif-container" class="row">
                   </div>
                 </center>
               </div>
@@ -217,102 +207,160 @@
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
     <script src="bower_components/jquery-ui/jquery-ui.min.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.webrtc-experiment.com/MediaStreamRecorder.js"></script>
+    <script src="https://cdn.webrtc-experiment.com/gif-recorder.js"></script>
+    <script type="text/javascript" src="https://static.twilio.com/libs/twiliojs/1.2/twilio.min.js"></script>
     <script>
-      'use strict';
+      var mediaConstraints = { video: true };
 
-      var videoElement = document.querySelector('video');
-      var audioSelect = document.querySelector('select#audioSource');
-      var videoSelect = document.querySelector('select#videoSource');
-      var canvas = document.querySelector('canvas');
-      var ctx = canvas.getContext('2d');
-      var localMediaStream = null;
+      navigator.getUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
 
-      navigator.getUserMedia = navigator.getUserMedia ||
-      navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+      document.querySelector('#stop').disabled = true;
 
-      /* Snapshot */
-      function snapshot() {
-        if (localMediaStream) {
-          ctx.drawImage(videoElement, 0, 0);
-          // "image/webp" works in Chrome.
-          // Other browsers will fall back to image/png.
-          $('.screenshot').show();
-          document.querySelector('img').src = canvas.toDataURL('image/webp');
-        }
-      }
+      document.querySelector('#start').onclick = function() {
+        this.disabled = true;
+        document.querySelector('#stop').disabled = false;
+        var timeInterval = 30000;
 
-      videoElement.addEventListener('click', snapshot, false);
-
-      // Not showing vendor prefixes or code that works cross-browser.
-      navigator.getUserMedia({video: true}, function(stream) {
-        videoElement.src = window.URL.createObjectURL(stream);
-        localMediaStream = stream;
-      }, errorCallback);
-
-
-      /* Source */
-      function gotSources(sourceInfos) {
-      for (var i = 0; i !== sourceInfos.length; ++i) {
-        var sourceInfo = sourceInfos[i];
-        var option = document.createElement('option');
-        option.value = sourceInfo.id;
-        if (sourceInfo.kind === 'audio') {
-          option.text = sourceInfo.label || 'Microphone ' +
-            (audioSelect.length + 1);
-          audioSelect.appendChild(option);
-        } else if (sourceInfo.kind === 'video') {
-          option.text = sourceInfo.label || 'Camera ' + (videoSelect.length + 1);
-          videoSelect.appendChild(option);
-        } else {
-          console.log('Some other kind of source: ', sourceInfo);
-        }
-      }
-      }
-
-      if (typeof MediaStreamTrack === 'undefined' ||
-        typeof MediaStreamTrack.getSources === 'undefined') {
-      alert('This browser does not support MediaStreamTrack.\n\nTry Chrome.');
-      } else {
-      MediaStreamTrack.getSources(gotSources);
-      }
-
-      function successCallback(stream) {
-      window.stream = stream; // make stream available to console
-      videoElement.src = window.URL.createObjectURL(stream);
-      videoElement.play();
-      }
-
-      function errorCallback(error) {
-      console.log('navigator.getUserMedia error: ', error);
-      }
-
-      function start() {
-      if (!!window.stream) {
-        videoElement.src = null;
-        window.stream.stop();
-      }
-      var audioSource = audioSelect.value;
-      var videoSource = videoSelect.value;
-      var constraints = {
-        audio: {
-          optional: [{
-            sourceId: audioSource
-          }]
-        },
-        video: {
-          optional: [{
-            sourceId: videoSource
-          }]
-        }
+        // get blob after specific time interval
+        mediaRecorder.start(timeInterval);
       };
-      navigator.getUserMedia(constraints, successCallback, errorCallback);
+
+      document.querySelector('#stop').onclick = function() {
+        this.disabled = true;
+        mediaRecorder.stop();
+      };
+
+      var mediaRecorder;
+      var blobURL, dataURL, uploadURL, imgurURL;
+      var phoneNumber;
+
+      var reader  = new FileReader();
+
+      function onMediaSuccess(stream) {
+          var video = document.createElement('video');
+
+          video = mergeProps(video, {
+              controls: false,
+              width: 320,
+              height: 240,
+              src: URL.createObjectURL(stream),
+              autoplay: true
+          });
+          video.play();
+
+          videosContainer.appendChild(video);
+
+          mediaRecorder = new MediaStreamRecorder(stream);
+          mediaRecorder.mimeType = 'image/gif'; // this line is mandatory
+          mediaRecorder.videoWidth  = 320;
+          mediaRecorder.videoHeight = 240;
+          mediaRecorder.ondataavailable = function(blob) {
+              blobURL = URL.createObjectURL(blob);
+
+
+              var xhr = new XMLHttpRequest;
+              xhr.responseType = 'blob';
+
+              xhr.onload = function() {
+                 var recoveredBlob = xhr.response;
+
+                 var reader = new FileReader;
+
+                 reader.onload = function() {
+                  dataURL = reader.result;
+                  //  window.location = blobAsDataUrl;
+                  uploadURL = dataURL.replace('data:image/gif;base64,', '');
+                 };
+
+                 reader.readAsDataURL(recoveredBlob);
+              };
+
+              xhr.open('GET', blobURL);
+              xhr.send();
+
+              $('#gif-container').append('<img src="' + blobURL + '"/>');
+              $('#gif-container').append('<div class="row"><div class="col-md-3"></div><div class="col-md-6"><span class="inside-title">Share Your Selfie</span><br><a class="btn btn-social-icon btn-facebook" onclick=share("facebook")><i class="fa fa-facebook"></i></a>&nbsp;<a class="btn btn-social-icon btn-twitter" onclick=share("twitter")><i class="fa fa-twitter"></i></a>&nbsp;<a class="btn btn-social-icon btn-pinterest" onclick=textMessage()><i class="glyphicon glyphicon-phone"></i></a><br><br></div><div class="col-md-3"></div></div>');
+          };
       }
 
-      audioSelect.onchange = start;
-      videoSelect.onchange = start;
+      function onMediaError(e) {
+        console.error('Media Error', e);
+      }
 
-      start();
+      function textMessage() {
+        getNumber();
+        share('twilio');
+      }
 
+      function getNumber() {
+        phoneNumber = prompt("Please a phone number (United States)", "(XXX)-XXX-XXXX").replace("[()\\s-]+", "");
+      }
+
+      function share(site) {
+        if(imgurURL) {
+          if(site == 'facebook') {
+            window.open('https://www.facebook.com/sharer/sharer.php?t=Selfie&u=' + imgurURL);
+          } else if(site == 'twitter') {
+            window.open('https://twitter.com/intent/tweet?text=Selfie&url='+ imgurURL +'&via=josephmilla');
+          } else if(site == 'twilio') {
+            $.ajax({
+              url: 'http://45.55.134.228:8081/twilio',
+              type: 'GET',
+              data: {
+                receiver: phoneNumber,
+                url: imgurURL
+              },
+              success: function(result) {
+                console.log("Message was sent!");
+              }
+            });
+          }
+        } else {
+          $.ajax({
+            url: 'https://api.imgur.com/3/image',
+            type: 'POST',
+            headers: {
+              Authorization: 'Client-ID d40b60584afc371',
+              Accept: 'application/json'
+            },
+            data: {
+              image: uploadURL,
+              type: 'base64'
+            },
+            success: function(result) {
+              var id = result.data.id;
+              // window.location = 'https://imgur.com/gallery/' + id;
+              imgurURL = 'http://i.imgur.com/'+ id + '.gif';
+              if(site == 'facebook') {
+                // window.open('https://www.facebook.com/sharer/sharer.php?t=Selfie&u=' + imgurURL);
+                window.open('https://www.facebook.com/dialog/share?app_id=145634995501895&display=popup&href=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2F&redirect_uri=https%3A%2F%2Fdevelopers.facebook.com%2Ftools%2Fexplorer')
+              } else if(site == 'twitter') {
+                window.open('https://twitter.com/intent/tweet?text=Selfie&url='+ imgurURL +'&via=josephmilla&hashtags=SorryNotSorry,ChallengePost,SummerJam');
+              } else if(site == 'twilio') {
+                $.ajax({
+                  url: 'http://45.55.134.228:8081/twilio',
+                  type: 'GET',
+                  data: {
+                    receiver: phoneNumber,
+                    url: imgurURL
+                  },
+                  success: function(result) {
+                    console.log("Message was sent!");
+                  }
+                });
+              }
+            }
+          });
+        }
+      }
+
+      var videosContainer = document.getElementById('videos-container');
+      var index = 1;
+
+      window.onbeforeunload = function() {
+        document.querySelector('#start').disabled = false;
+      };
     </script>
   </body>
 </html>
