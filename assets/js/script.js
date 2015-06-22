@@ -129,7 +129,7 @@ function share(site) {
           url: 'https://api.imgur.com/3/album/K8QkR/add',
           type: 'PUT',
           headers: {
-            Authorization: 'Bearer 0a10676df9afdc839ae53ce952e5db850c6b3463',
+            Authorization: 'Bearer ef1916477c368e9eb7c56b19c8efc2ae5639c299',
             Accept: 'application/json'
           },
           data: {
@@ -139,7 +139,7 @@ function share(site) {
 
         if(site == 'facebook') {
           // window.open('https://www.facebook.com/sharer/sharer.php?t=Selfie&u=' + imgurURL);
-          window.open('https://www.facebook.com/dialog/share?app_id=145634995501895&display=popup&href=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2F&redirect_uri=https%3A%2F%2Fdevelopers.facebook.com%2Ftools%2Fexplorer')
+          window.open('https://www.facebook.com/sharer/sharer.php?t=Selfie&u=' + imgurURL);
         } else if(site == 'twitter') {
           window.open('https://twitter.com/intent/tweet?text=Selfie&url='+ imgurURL +'&via=josephmilla&hashtags=SorryNotSorry,ChallengePost,SummerJam');
         } else if(site == 'twilio') {
