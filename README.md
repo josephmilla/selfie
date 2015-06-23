@@ -1,4 +1,8 @@
-# Selfie, The Best Selfie Web Application. Period. Jk.
+![Selfie](https://raw.githubusercontent.com/josephmilla/selfie/master/challengepost/logo.jpg)
+
+# Selfie, The Best Selfie Web Application. Period.
+
+*(Just kidding..)*
 
 ## Inspiration
 
